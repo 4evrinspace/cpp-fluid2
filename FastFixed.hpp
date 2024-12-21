@@ -13,6 +13,14 @@ template <int n, int k> class FastFixed
     using type =
         conditional_t<(n <= 8), int_fast8_t,conditional_t<(n <= 16), int_fast16_t,conditional_t<(n <= 32), int_fast32_t, conditional_t<(n <= 64), int_fast64_t, void>>>>;
 
+    operator double() const
+    {
+        return v / (double)(1 << k);
+    }
+    operator float() const
+    {
+        return v / (float)(1 << k);
+    }
     constexpr FastFixed(int v) : v(v << k)
     {
     }
@@ -68,7 +76,7 @@ template <int n, int k> class FastFixed
         v = to_double<T>(x) * (1 << k);
         return *this;
     }
-
+    
 
     static constexpr int Left = n;
     static constexpr int Right = k;
@@ -85,6 +93,8 @@ FastFixed<n, k> operator+(FastFixed<n, k> a, T b) {
     return FastFixed<n, k>::from_raw(a.v + FastFixed<n, k>(to_double<T>(b)).v);
 }
 
+
+
 template<int n, int k>
 FastFixed<n, k> operator-(FastFixed<n, k> a, FastFixed<n, k> b) {
     return FastFixed<n, k>::from_raw(a.v - b.v);
@@ -95,6 +105,7 @@ FastFixed<n, k> operator-(FastFixed<n, k> a, T b) {
     return FastFixed<n, k>::from_raw(a.v - FastFixed<n, k>(to_double<T>(b)).v);
 }
 
+
 template<int n, int k>
 FastFixed<n, k> operator*(FastFixed<n, k> a, FastFixed<n, k> b) {
     return FastFixed<n, k>::from_raw(((int64_t) a.v * b.v) >> k);
@@ -104,14 +115,18 @@ FastFixed<n, k> operator*(FastFixed<n, k> a, T b) {
     return FastFixed<n, k>::from_raw(((int64_t) a.v * FastFixed<n, k>(to_double<T>(b)).v) >> k);
 }
 
+
 template<int n, int k>
 FastFixed<n, k> operator/(FastFixed<n, k> a, FastFixed<n, k> b) {
     return FastFixed<n, k>::from_raw(((int64_t) a.v << k) / b.v);
 }
 template<typename T, int n, int k>
 FastFixed<n, k> operator/(FastFixed<n, k> a, T b) {
-    return FastFixed<n, k>::from_raw(((int64_t) a.v << k) / FastFixed<n, k>(to_double<T>(b)).v);;
+    return FastFixed<n, k>::from_raw(((int64_t) a.v << k) / FastFixed<n, k>(to_double<T>(b)).v);
 }
+
+
+
 
 template<int n, int k>
 FastFixed<n, k> &operator+=(FastFixed<n, k> &a, FastFixed<n, k> b) {
@@ -121,6 +136,42 @@ FastFixed<n, k> &operator+=(FastFixed<n, k> &a, FastFixed<n, k> b) {
 template<typename T, int n, int k>
 FastFixed<n, k> &operator+=(FastFixed<n, k> &a, T b) {
     a = a + FastFixed<n, k>(to_double<T>(b));
+    return a;
+}
+
+
+template<int n, int k>
+FastFixed<n, k> &operator*=(FastFixed<n, k> &a, FastFixed<n, k> b) {
+    a = a * b;
+    return a;
+}
+template<typename T, int n, int k>
+FastFixed<n, k> &operator*=(FastFixed<n, k> &a, T b) {
+    a = a * FastFixed<n, k>(to_double<T>(b));
+    return a;
+}
+
+
+template<int n, int k>
+FastFixed<n, k> &operator-=(FastFixed<n, k> &a, FastFixed<n, k> b) {
+    a = a - b;
+    return a;
+}
+template<typename T, int n, int k>
+FastFixed<n, k> &operator-=(FastFixed<n, k> &a, T b) {
+    a = a - FastFixed<n, k>(to_double<T>(b));
+    return a;
+}
+
+
+template<int n, int k>
+FastFixed<n, k> &operator/=(FastFixed<n, k> &a, FastFixed<n, k> b) {
+    a = a / b;
+    return a;
+}
+template<typename T, int n, int k>
+FastFixed<n, k> &operator/=(FastFixed<n, k> &a, T b) {
+    a = a / FastFixed<n, k>(to_double<T>(b));
     return a;
 }
 

@@ -7,7 +7,7 @@ using namespace std;
 
 #define pp pair<int, int>
 #ifndef TYPES
-#define TYPES FLOAT,FIXED(31,17),FAST_FIXED(25, 11),FIXED(32, 16),DOUBLE,FAST_FIXED(32, 16)
+#define TYPES FLOAT,FIXED(32,17),FAST_FIXED(25, 11),FIXED(32, 16),DOUBLE,FAST_FIXED(32, 16)
 #endif
 
 #ifndef SIZES
@@ -64,27 +64,45 @@ pair<int, int> parse_size(const string &size_str)
     return {n, m};
 }
 
-template <pair<int, int>... Sizes> 
-struct SizesList
+
+
+template <typename T, T... elements>
+struct VargList
 {
-    static constexpr size_t size = sizeof...(Sizes);
+    static constexpr size_t size = sizeof...(elements);
     template <size_t I> 
-    static constexpr pair<int, int> get()
+    static constexpr T get()
     {
-        constexpr pair<int, int> arr[] = {Sizes...};
+        constexpr T arr[] = {elements...};
         return arr[I];
     }
-};
-#define S(N,M) pair<int, int>(N, M)
-using MySizeList = SizesList<SIZES>;
-#undef S
 
-template <typename List, size_t I = 0> 
+};
+
+//Здеся copilot выручил
+template <typename... T>
+struct TypeVargList
+{
+    static constexpr size_t size = sizeof...(T);
+    template <size_t I> 
+    using get_type = typename std::tuple_element<I, std::tuple<T...>>::type;
+
+};
+
+
+#define S(N,M) pair<int, int>(N, M)
+using SizeList = VargList<pair<int, int>, SIZES>;
+#undef S
+#define FLOAT Float
+#define DOUBLE Double
+#define FIXED(N, K) Fixed<N, K>
+#define FAST_FIXED(N, K) FastFixed<N, K>
+using TypesList = TypeVargList<TYPES>;
+
+template <size_t I = 0> 
 constexpr bool matches_size(const pair<int, int> &size)
 {
-    if (I > List::size)
-        return false;
-    return (List::template get<I>() == size);
+    return (SizeList::get<I>() == size);
 }
 
 
@@ -157,34 +175,23 @@ static bool matches_type(const string &type)
     return false;
 }
 
-template <typename... Types> 
-struct TypesList
-{
-    static constexpr size_t size = sizeof...(Types);
-    template <size_t I> 
-    using type_at = typename std::tuple_element<I, std::tuple<Types...>>::type;
-};
-
-template <typename AllowedTypes, typename SelectedTypes> 
 struct TypeSelector
 {
-    template <typename... Selected> 
     static bool try_combinations()
     {
         return try_all_p_types<0>();
     }
 
-  private:
     template <size_t I> 
     static bool try_all_p_types()
     {
-        if constexpr (I >= AllowedTypes::size)
+        if constexpr (I >= TypesList::size)
         {
             return false;
         }
         else
         {
-            using P = typename AllowedTypes::template type_at<I>;
+            using P = typename TypesList::get_type<I>;
             return try_with_p_type<P>() || try_all_p_types<I + 1>();
         }
     }
@@ -200,13 +207,13 @@ struct TypeSelector
     template <typename P, size_t I> 
     static bool try_all_v_types()
     {
-        if constexpr (I >= AllowedTypes::size)
+        if constexpr (I >= TypesList::size)
         {
             return false;
         }
         else
         {
-            using V = typename AllowedTypes::template type_at<I>;
+            using V = typename TypesList::get_type<I>;
             return try_with_v_type<P, V>() || try_all_v_types<P, I + 1>();
         }
     }
@@ -222,13 +229,13 @@ struct TypeSelector
     template <typename P, typename V, size_t I> 
     static bool try_all_vf_types()
     {
-        if constexpr (I >= AllowedTypes::size)
+        if constexpr (I >= TypesList::size)
         {
             return false;
         }
         else
         {
-            using VF = typename AllowedTypes::template type_at<I>;
+            using VF = typename TypesList::get_type<I>;
             return try_with_vf_type<P, V, VF>() || try_all_vf_types<P, V, I + 1>();
         }
     }
@@ -244,7 +251,7 @@ struct TypeSelector
     template <typename P, typename V, typename VF, size_t I> 
     static bool try_all_size_find()
     {
-        if constexpr (I >= MySizeList::size)
+        if constexpr (I >= SizeList::size)
         {
             return run_simulation<P, V, VF, 0, 0>();
         }
@@ -257,9 +264,9 @@ struct TypeSelector
     template <typename P, typename V, typename VF, size_t I> 
     static bool try_with_size_find()
     {
-        if (matches_size<MySizeList, I>(fsize))
+        if (matches_size<I>(fsize))
         {
-            return run_simulation<P, V, VF, MySizeList::get<I>().first, MySizeList::get<I>().second>();
+            return run_simulation<P, V, VF, SizeList::get<I>().first, SizeList::get<I>().second>();
         }
         else
         {
@@ -274,7 +281,7 @@ struct TypeSelector
 
 template <typename... Types> bool try_all_type_combinations()
 {
-    return TypeSelector<TypesList<Types...>, TypesList<>>::try_combinations();
+    return TypeSelector::try_combinations();
 }
 
 bool start_simulation()
@@ -282,10 +289,7 @@ bool start_simulation()
     try
     {
 
-#define FLOAT float
-#define DOUBLE double
-#define FIXED(N, K) Fixed<N, K>
-#define FAST_FIXED(N, K) FastFixed<N, K>
+
         if (!try_all_type_combinations<TYPES>())
         {
             throw std::runtime_error("No type combination was found ");

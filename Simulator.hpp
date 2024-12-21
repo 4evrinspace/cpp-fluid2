@@ -68,13 +68,13 @@ class Simulator
             int nx = x + dx, ny = y + dy;
             if (field[nx][ny] != '#' && last_use[nx][ny] < UT)
             {
-                auto cap = velocity.get(x, y, dx, dy);
-                auto flow = velocity_flow.get(x, y, dx, dy);
+                V_type cap = velocity.get(x, y, dx, dy);
+                V_flow_type flow = velocity_flow.get(x, y, dx, dy);
                 if (flow == cap)
                 {
                     continue;
                 }
-                auto vp = min(lim, P_type(cap - flow));
+                P_type vp = min(lim, P_type(cap - flow));
                 if (last_use[nx][ny] == UT - 1)
                 {
                     velocity_flow.add(x, y, dx, dy, vp);
@@ -333,7 +333,7 @@ class Simulator
                         if (old_v > 0)
                         {
                             assert(new_v <= old_v);
-                            velocity.get(x, y, dx, dy) = new_v;
+                            velocity.get(x, y, dx, dy) = to_double(new_v);
                             auto force = (old_v - new_v) * rho[(int)field[x][y]];
                             if (field[x][y] == '.')
                                 force *= P_type(0.8);
@@ -397,7 +397,7 @@ template <typename P_type, typename V_type, typename V_flow_type>
 class Simulator <P_type, V_type, V_flow_type, 0, 0>
 {
   public:
-  int n, m;
+    int n, m;
     static constexpr size_t some_T = 1'000'000;
     static constexpr std::array<pair<int, int>, 4> deltas{{{-1, 0}, {1, 0}, {0, -1}, {0, 1}}};
     static constexpr P_type inf = P_type::get_infinity();
@@ -412,12 +412,12 @@ class Simulator <P_type, V_type, V_flow_type, 0, 0>
     {
         array<T, deltas.size()>** v;
 
-        VectorField() : v()
+        VectorField(int _n, int _m) : v()
         {
-            v = new array<T, deltas.size()> *[n];
-            for (int i = 0; i < n; i++)
+            v = new array<T, deltas.size()> *[_n];
+            for (int i = 0; i < _n; i++)
             {
-                v[i] = new array<T, deltas.size()>[m];
+                v[i] = new array<T, deltas.size()>[_m];
             }
         }
 
@@ -441,8 +441,9 @@ class Simulator <P_type, V_type, V_flow_type, 0, 0>
     int UT;
     char** field;
 
-    Simulator(ifstream& input, int n, int m) : velocity(), velocity_flow(), n(n), m(m)
+    Simulator(ifstream& input, int n, int m) : n(n), m(m), velocity(n, m), velocity_flow(n, m)
     {
+        
         dirs = new int *[n];
         p = new P_type *[n];
         old_p = new P_type *[n];
@@ -728,7 +729,13 @@ class Simulator <P_type, V_type, V_flow_type, 0, 0>
                 }
             }
 
-            velocity_flow = {};
+            for (int i = 0; i < n; i++)
+            {
+                for (int j = 0; j < m; j++)
+                {
+                    velocity_flow.v[i][j] = {};
+                }
+            }
             bool prop = false;
             do
             {
@@ -763,7 +770,7 @@ class Simulator <P_type, V_type, V_flow_type, 0, 0>
                         if (old_v > 0)
                         {
                             assert(new_v <= old_v);
-                            velocity.get(x, y, dx, dy) = new_v;
+                            velocity.get(x, y, dx, dy) = to_double(new_v);
                             auto force = (old_v - new_v) * rho[(int)field[x][y]];
                             if (field[x][y] == '.')
                                 force *= P_type(0.8);
