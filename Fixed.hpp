@@ -90,10 +90,6 @@ Fixed<n, k> operator+(Fixed<n, k> a, T b) {
     return Fixed<n, k>::from_raw(a.v + Fixed<n, k>(to_double<T>(b)).v);
 }
 
-template<typename T, int n, int k>
-Fixed<n, k> operator+(T a, Fixed<n, k> b) {
-    return Fixed<n, k>::from_raw(b.v + Fixed<n, k>(to_double<T>(a)).v);
-}
 
 template<int n, int k>
 Fixed<n, k> operator-(Fixed<n, k> a, Fixed<n, k> b) {
@@ -104,10 +100,7 @@ template<typename T, int n, int k>
 Fixed<n, k> operator-(Fixed<n, k> a, T b) {
     return Fixed<n, k>::from_raw(a.v - Fixed<n, k>(to_double<T>(b)).v);
 }
-template<typename T, int n, int k>
-Fixed<n, k> operator-(T a, Fixed<n, k> b) {
-    return Fixed<n, k>::from_raw(Fixed<n, k>(to_double<T>(a)).v - b.v);
-}
+
 
 template<int n, int k>
 Fixed<n, k> operator*(Fixed<n, k> a, Fixed<n, k> b) {
@@ -116,10 +109,6 @@ Fixed<n, k> operator*(Fixed<n, k> a, Fixed<n, k> b) {
 template<typename T, int n, int k>
 Fixed<n, k> operator*(Fixed<n, k> a, T b) {
     return Fixed<n, k>::from_raw(((int64_t) a.v * Fixed<n, k>(to_double<T>(b)).v) >> k);
-}
-template<typename T, int n, int k>
-Fixed<n, k> operator*(T a, Fixed<n, k> b) {
-    return Fixed<n, k>::from_raw(((int64_t) b.v * Fixed<n, k>(to_double<T>(a)).v) >> k);
 }
 
 template<int n, int k>
@@ -131,10 +120,7 @@ Fixed<n, k> operator/(Fixed<n, k> a, T b) {
     return Fixed<n, k>::from_raw(((int64_t) a.v << k) / Fixed<n, k>(to_double<T>(b)).v);
 }
 
-template<typename T, int n, int k>
-Fixed<n, k> operator/(T a, Fixed<n, k> b) {
-    return Fixed<n, k>(to_double<T>(a)) / b;
-}
+
 
 template<int n, int k>
 Fixed<n, k> &operator+=(Fixed<n, k> &a, Fixed<n, k> b) {
@@ -147,11 +133,7 @@ Fixed<n, k> &operator+=(Fixed<n, k> &a, T b) {
     return a;
 }
 
-template<typename T, int n, int k>
-T &operator+=(T &a, Fixed<n, k> b) {
-    a = a + static_cast<T>(b);
-    return a;
-}
+
 template<int n, int k>
 Fixed<n, k> &operator*=(Fixed<n, k> &a, Fixed<n, k> b) {
     a = a * b;
@@ -163,11 +145,7 @@ Fixed<n, k> &operator*=(Fixed<n, k> &a, T b) {
     return a;
 }
 
-template<typename T, int n, int k>
-T &operator*=(T &a, Fixed<n, k> b) {
-    a = a * static_cast<T>(b);
-    return a;
-}
+
 template<int n, int k>
 Fixed<n, k> &operator-=(Fixed<n, k> &a, Fixed<n, k> b) {
     a = a - b;
@@ -179,11 +157,7 @@ Fixed<n, k> &operator-=(Fixed<n, k> &a, T b) {
     return a;
 }
 
-template<typename T, int n, int k>
-T &operator-=(T &a, Fixed<n, k> b) {
-    a = a - static_cast<T>(b);
-    return a;
-}
+
 template<int n, int k>
 Fixed<n, k> &operator/=(Fixed<n, k> &a, Fixed<n, k> b) {
     a = a / b;
@@ -195,11 +169,7 @@ Fixed<n, k> &operator/=(Fixed<n, k> &a, T b) {
     return a;
 }
 
-template<typename T, int n, int k>
-T &operator/=(T &a, Fixed<n, k> b) {
-    a = a / static_cast<T>(b);
-    return a;
-}
+
 template<int n, int k>
 Fixed<n, k> abs(Fixed<n, k> x) {
     if (x.v < 0) {

@@ -12,7 +12,7 @@ template<int n, int k>
 class FastFixed;
 
 template< typename T>
-double to_double(T x)
+double to_double(const T& x)
 {
     if constexpr (is_floating_point<T>::value || is_same<T, int>::value)
     {
@@ -41,6 +41,7 @@ T random01()
 class Float
 {
     public:
+    
     template<typename T>
     constexpr Float (T x) : v(to_double<T>(x))
     {
@@ -60,12 +61,14 @@ class Float
         return *this;
     }
 
-    template <typename T> auto operator<=>(OTHER x) const
+    template <typename T> 
+    auto operator<=>(T x) const
     {
         return v <=> to_double(x);
     }
 
-    template <typename OTHER> bool operator==(OTHER x) const
+    template <typename T> 
+    bool operator==(T x) const
     {
         return v == to_double(x);
     }
@@ -80,93 +83,152 @@ class Float
         return Float(std::numeric_limits<float>::max());
     }
 
-
     float v;
 
-}
+};
+class Double
+{
+    public:
+    
+    template<typename T>
+    constexpr Double (T x) : v(to_double<T>(x))
+    {
+    }
+
+    constexpr Double() : v(0)
+    {
+    }
+
+    auto operator<=>(const Double &) const = default;
+    bool operator==(const Double &) const = default;
+
+    template <typename T> 
+    Double &operator=(T x)
+    {
+        v = to_double(x);
+        return *this;
+    }
+
+    template <typename T> 
+    auto operator<=>(T x) const
+    {
+        return v <=> to_double(x);
+    }
+
+    template <typename T> 
+    bool operator==(T x) const
+    {
+        return v == to_double(x);
+    }
+
+    static constexpr Double get_epsilon()
+    {
+        return Double(4);
+    }
+
+    static constexpr Double get_infinity()
+    {
+        return Double(std::numeric_limits<double>::max());
+    }
+
+    double v;
+
+};
 
 
 
 
 template<typename T>
-double operator+(double a, T b) {
+Double operator+(Double a, T b) {
     return a + to_double<T>(b);
 }
 
 template<typename T>
-double operator-(double a, T b) {
+Double operator-(Double a, T b) {
     return a - to_double<T>(b);
 }
 
 template<typename T>
-double operator*(double a, T b) {
+Double operator*(Double a, T b) {
     return a * to_double<T>(b);
 }
 template<typename T>
-double operator/(double a, T b) {
+Double operator/(Double a, T b) {
     return a / to_double<T>(b);
 }
 
 template<typename T>
-double operator+=(double& a, T b) {
+Double& operator+=(Double& a, T b) {
     a = a + to_double<T>(b);
     return a;
 }
 template<typename T>
-double operator*=(double& a, T b) {
+Double& operator*=(Double& a, T b) {
     a = a * to_double<T>(b);
     return a;
 }
 template<typename T>
-double operator-=(double& a, T b) {
+Double& operator-=(Double& a, T b) {
     a = a - to_double<T>(b);
     return a;
 }
 template<typename T>
-double operator/=(double& a, T b) {
+Double& operator/=(Double& a, T b) {
     a = a / to_double<T>(b);
     return a;
 }
+Double abs(Double x) {
+    if (x.v < 0) {
+        x.v = -x.v;
+    }
+    return x;
+}
 
 
-/*
 template<typename T>
-float operator+(float a, T b) {
+Float operator+(Float a, T b) {
     return a + to_float<T>(b);
 }
 
 template<typename T>
-float operator-(float a, T b) {
+Float operator-(Float a, T b) {
     return a - to_float<T>(b);
 }
 
 template<typename T>
-float operator*(float a, T b) {
+Float operator*(Float a, T b) {
     return a * to_float<T>(b);
 }
 template<typename T>
-float operator/(float a, T b) {
+Float operator/(Float a, T b) {
     return a / to_float<T>(b);
 }
 
 template<typename T>
-float operator+=(float& a, T b) {
+Float& operator+=(Float& a, T b) {
     a = a + to_float<T>(b);
     return a;
 }
 template<typename T>
-float operator*=(float& a, T b) {
+Float& operator*=(Float& a, T b) {
     a = a * to_float<T>(b);
     return a;
 }
 template<typename T>
-float operator-=(float& a, T b) {
+Float& operator-=(Float& a, T b) {
     a = a - to_float<T>(b);
     return a;
 }
 template<typename T>
-float operator/=(float& a, T b) {
+Float& operator/=(Float& a, T b) {
     a = a / to_float<T>(b);
     return a;
 }
-*/
+
+
+Float abs(Float x) {
+    if (x.v < 0) {
+        x.v = -x.v;
+    }
+    return x;
+}

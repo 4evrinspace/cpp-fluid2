@@ -7,11 +7,11 @@ using namespace std;
 
 #define pp pair<int, int>
 #ifndef TYPES
-#define TYPES FLOAT,FIXED(32,17),FAST_FIXED(25, 11),FIXED(32, 16),DOUBLE,FAST_FIXED(32, 16)
+#define TYPES FLOAT
 #endif
 
 #ifndef SIZES
-#define SIZES S(36,84), S(100,100)
+#define SIZES S(36,84)
 #endif
 
 
@@ -150,11 +150,11 @@ pair<int, int> parse_fixed_params(const string &type)
 template <typename T> 
 static bool matches_type(const string &type)
 {
-    if constexpr (std::is_same_v<T, float>)
+    if constexpr (std::is_same_v<T, Float>)
     {
         return type == "FLOAT";
     }
-    else if constexpr (std::is_same_v<T, double>)
+    else if constexpr (std::is_same_v<T, Double>)
     {
         return type == "DOUBLE";
     }
@@ -289,7 +289,6 @@ bool start_simulation()
     try
     {
 
-
         if (!try_all_type_combinations<TYPES>())
         {
             throw std::runtime_error("No type combination was found ");
@@ -340,8 +339,9 @@ int main(int argc, char **argv)
         }
     }
 
-
+    
     start_simulation();
+    
     input.close();
     return 0;
 }
