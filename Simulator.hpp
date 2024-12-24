@@ -32,7 +32,7 @@ class Simulator
         T &get(int x, int y, int dx, int dy)
         {
             size_t i = find(deltas.begin(), deltas.end(), pair(dx, dy)) - deltas.begin();
-            // assert(i < deltas.size());
+            assert(i < deltas.size());
             return v[x][y][i];
         }
     };
@@ -429,7 +429,7 @@ class Simulator <P_type, V_type, V_flow_type, 0, 0>
         T &get(int x, int y, int dx, int dy)
         {
             size_t i = find(deltas.begin(), deltas.end(), pair(dx, dy)) - deltas.begin();
-            // assert(i < deltas.size());
+            assert(i < deltas.size());
             return v[x][y][i];
         }
     };
